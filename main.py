@@ -20,7 +20,22 @@ def process_title(title_list):
 
 
 def process_resource(resource):
-    resource
+    try:
+        regex = re.compile(r"\d{4}")
+        resource = regex.sub(" ", resource)
+        regex = re.compile(r"\d{1,2}[ \-]?\w{2}")
+        resource = regex.sub(" ", resource)
+        regex = re.compile(r"\d{1,2}\.")
+        resource = regex.sub(" ", resource)
+        regex = re.compile(r"[IVX]{2,4}\.?")
+        resource = regex.sub(" ", resource)
+        regex = re.compile(r" +")
+        resource = regex.sub(" ", resource)
+        resource = resource.strip()
+    except TypeError:
+        print(f"Cannot process the following resource {resource}")
+        return ""
+    return resource
 
 
 data = {}
@@ -32,6 +47,8 @@ for child in root:
             row["autoři"] = process_author_list(subchild)
         elif subchild.tag == "titul_list":
             row["název"] = process_title(subchild)
+        elif subchild.tag == "zdroj_nazev":
+            row["zdroj"] = process_resource(subchild.text)
         else:
             if subchild.text:
                 row[subchild.tag] = subchild.text
