@@ -4,7 +4,7 @@ import re
 
 
 xml_data = open('publications.xml', 'r', encoding="utf-8").read()
-xml_data = xml_data.replace("&", "")
+xml_data = xml_data.replace("&", "&amp;")
 root = ET.fromstring(xml_data)
 
 
@@ -40,7 +40,11 @@ def process_resource(resource):
 
 data = {}
 for child in root:
-    literarni_forma = child.find('literarni_forma').text
+    try:
+        literarni_forma = child.find('literarni_forma').text
+    except AttributeError as err:
+        literarni_forma = "Nedefinovaná literárání forma"
+        print(ET.tostring(child))
     row = {}
     for subchild in child:
         if subchild.tag == "autor_list":
@@ -48,7 +52,8 @@ for child in root:
         elif subchild.tag == "titul_list":
             row["název"] = process_title(subchild)
         elif subchild.tag == "zdroj_nazev":
-            row["zdroj"] = process_resource(subchild.text)
+            if subchild.text is not None:
+                row["zdroj"] = process_resource(subchild.text)
         else:
             if subchild.text:
                 row[subchild.tag] = subchild.text
